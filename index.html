@@ -1,95 +1,598 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Inicio de Sesión</title>
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inicio - Asistente Ineffa (Juegos)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <body class="bg-light">
-    <div class="container mt-5">
-      <h2 class="text-center mb-4">Inicio de Sesión</h2>
+  <style>
+    :root{
+      --bg:#0d0d0d; --card:#141414; --accent:#00bfff; --accent-2:#03da6b; --muted:#9aa0a6;
+      --bubble:#0f3057; --bubble-txt:#dffcff;
+    }
+    body{ background:var(--bg); color:#f1f1f1; font-family: "Poppins", sans-serif; padding-bottom:40px;}
+    .card{ background:var(--card); border-radius:12px; border:none; box-shadow:0 8px 30px rgba(0,0,0,0.6);}
+    h2,h4{ color:var(--accent); }
+    label{ color:var(--accent-2); font-weight:600; }
+    input.form-control{ background:#1e1e1e; color:#fff; border:1px solid #2b2b2b; }
+    .form-text{ color:var(--muted); }
+    .btn-primary{ background:#0066ff; border:none; }
+    .btn-secondary{ background:#20c839; border:none; color:#fff;}
+    .table-dark th{ background:#0a0a0a !important; color:#fff; }
+    .avatar-asistente{ width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--accent); background:#111;}
+    #asistente-venti{ display:flex; gap:14px; align-items:flex-end; padding:14px; margin-top:30px; border-radius:12px; background:linear-gradient(90deg, rgba(10,10,10,0.8), rgba(15,25,40,0.6)); box-shadow:0 0 30px rgba(0,191,255,0.08); }
+    .mensaje-burbuja{ background:var(--bubble); color:var(--bubble-txt); padding:12px 16px; border-radius:14px 14px 14px 0; max-width:360px; }
+    .panel-user{ background:#0f1720; padding:12px; border-radius:10px; color:#d7f7ff; }
+    .small-muted{ color:var(--muted); font-size:13px;}
+    /* Chat */
+    #chatBox{ max-height:220px; overflow-y:auto; background:#0f1417; padding:12px; border-radius:8px; border:1px solid #222; margin-bottom:8px; }
+    .chat-msg{ margin-bottom:10px; }
+    .ia-msg{ color:var(--accent); font-weight:600; }
+    .user-msg{ color:#c3ffb3; font-weight:600; }
+    /* TicTacToe */
+    .ttt-board{ display:grid; grid-template-columns:repeat(3,80px); gap:8px; justify-content:center; }
+    .ttt-cell{ width:80px; height:80px; display:flex; align-items:center; justify-content:center; background:#111; border-radius:8px; font-size:34px; cursor:pointer; user-select:none; }
+    .ttt-cell:hover{ transform:scale(1.03); transition:0.12s; }
+    .score-badge{ background:rgba(255,255,255,0.03); padding:6px 10px; border-radius:10px; color:#9fe3ff; }
+    /* responsive tweaks */
+    @media(max-width:900px){
+      .ttt-board{ grid-template-columns:repeat(3,60px); gap:6px; }
+      .ttt-cell{ width:60px;height:60px;font-size:26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h2 class="text-center mb-3">🌌 Inicio de Sesión — Asistente Ineffa</h2>
 
-      <!-- Contenedor principal con imagen + formulario -->
-      <div class="row align-items-center justify-content-center">
-        
-        <!-- Imagen -->
-        <div class="col-md-4 text-center">
-          <img src="venti.png" 
-               alt="icono"
-               class="img-fluid rounded shadow-sm"
-               style="max-width: 250px;">
+    <div class="row gy-4">
+      <!-- Left: Image + user panel -->
+      <div class="col-lg-4">
+        <div class="card p-3 mb-4 text-center">
+          <img src="venti.png" alt="venti" class="img-fluid mb-2" style="max-width:170px;">
+          <p class="small-muted">Bienvenido al prototipo interactivo. Inicia sesión para activar a Ineffa y jugar.</p>
         </div>
 
-        <!-- Formulario -->
-        <div class="col-md-6">
-          <form id="loginForm" class="border p-4 bg-white rounded shadow-sm">
-            <div class="mb-3">
-              <label for="email" class="form-label">Correo Electrónico</label>
-              <input type="email" class="form-control" id="email" placeholder="usuario@correo.com" required>
-              <div id="emailHelp" class="form-text">Nunca compartiremos tu correo con nadie.</div>
+        <div id="userPanel" class="card p-3 panel-user d-none mb-4">
+          <div class="d-flex align-items-center gap-3">
+            <img id="panelAvatar" src="Ineffa.png" class="avatar-asistente" alt="ineffa">
+            <div>
+              <div id="panelEmail" style="font-weight:700"></div>
+              <div class="small-muted">Puntos: <span id="panelScore">0</span> &nbsp;•&nbsp; Sesiones: <span id="panelSessions">0</span></div>
             </div>
-
-            <div class="mb-3">
-              <label for="password" class="form-label">Contraseña</label>
-              <input type="password" class="form-control" id="password" placeholder="********" required>
-            </div>
-
-            <div class="mb-3 form-check">
-              <input type="checkbox" class="form-check-input" id="checkRemember">
-              <label class="form-check-label" for="checkRemember">Recordarme</label>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-          </form>
+          </div>
+          <hr style="border-color:#111; margin:10px 0;">
+          <div id="panelMsg" class="small-muted">Aquí aparecen mensajes y resultados de tus juegos.</div>
+          <div class="mt-2 d-flex gap-2">
+            <button id="btnPlayMenu" class="btn btn-sm btn-primary">Jugar</button>
+            <button id="btnViewHistory" class="btn btn-sm btn-secondary">Historial</button>
+            <button id="btnLogout" class="btn btn-sm" style="background:#444;color:#fff">Cerrar sesión</button>
+          </div>
         </div>
       </div>
 
-      <!-- Tabla de usuarios -->
-      <div class="mt-5">
-        <h4>Usuarios Registrados</h4>
-        <table class="table table-bordered table-striped">
-          <thead class="table-dark">
-            <tr>
-              <th>#</th>
-              <th>Correo Electrónico</th>
-              <th>Contraseña</th>
-              <th>Recordar</th>
-            </tr>
-          </thead>
-          <tbody id="tablaUsuarios">
-          </tbody>
-        </table>
+      <!-- Right: Login and table -->
+      <div class="col-lg-8">
+        <div class="card p-4">
+          <form id="loginForm" class="row g-3">
+            <div class="col-md-6">
+              <label for="email">Correo Electrónico</label>
+              <input id="email" type="email" class="form-control" placeholder="usuario@correo.com" required>
+            </div>
+            <div class="col-md-6">
+              <label for="password">Contraseña</label>
+              <input id="password" type="password" class="form-control" placeholder="********" required>
+            </div>
+            <div class="col-12 d-flex align-items-center">
+              <input id="checkRemember" type="checkbox" class="form-check-input me-2">
+              <label for="checkRemember" class="form-check-label">Mantener sesión activa</label>
+            </div>
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary flex-fill" type="submit">Ingresar / Registrar</button>
+              <button id="btnClearUsers" type="button" class="btn btn-danger">Borrar usuarios</button>
+            </div>
+            <div class="col-12">
+              <small class="form-text">Si el correo no existe se registrará automáticamente.</small>
+            </div>
+          </form>
+        </div>
+
+        <div class="card p-3 mt-4">
+          <h4>Usuarios Registrados</h4>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped mt-2">
+              <thead>
+                <tr><th>#</th><th>Correo</th><th>Contraseña</th><th>Recordar</th><th>Acciones</th></tr>
+              </thead>
+              <tbody id="tablaUsuarios"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Script -->
-    <script>
-      const form = document.getElementById('loginForm');
-      const tabla = document.getElementById('tablaUsuarios');
-      let contador = 0;
+    <!-- Chat + Games -->
+    <div class="card p-3 mt-4">
+      <div class="d-flex align-items-start gap-3">
+        <img src="Ineffa.png" class="avatar-asistente" alt="ineffa">
+        <div style="flex:1">
+          <div id="chatBox" class="" role="log" aria-live="polite"></div>
 
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
+          <div class="d-flex gap-2">
+            <input id="chatInput" class="form-control" placeholder="Escribe: 'jugar' / 'puntaje' / 'historial' / pregunta..." />
+            <button id="chatSend" class="btn btn-success">Enviar</button>
+          </div>
 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const recordar = document.getElementById('checkRemember').checked ? 'Sí' : 'No';
+          <div class="mt-3 d-flex gap-2">
+            <div class="score-badge">Puntos: <span id="scoreBadge">0</span></div>
+            <div class="score-badge">Partidas Gato: <span id="tttPlayed">0</span></div>
+            <div class="score-badge">Aciertos: <span id="quizCorrect">0</span></div>
+          </div>
+        </div>
+      </div>
 
-        contador++;
+      <!-- Play menu modal-like area -->
+      <div id="playArea" class="mt-3 d-none">
+        <div class="card p-3" style="background:#0b1530">
+          <div id="playTitle" style="font-weight:700;color:#9fe3ff">Elige juego:</div>
+          <div class="d-flex gap-2 mt-2">
+            <button id="playMath" class="btn btn-primary">Matemáticas rápidas</button>
+            <button id="playRiddle" class="btn btn-secondary">Adivinanza</button>
+            <button id="playTic" class="btn btn-dark" style="background:#222; border:1px solid #333">Gato (vs Ineffa)</button>
+            <button id="closePlay" class="btn btn-sm" style="background:#333;color:#fff">Cerrar</button>
+          </div>
 
-        const nuevaFila = document.createElement('tr');
-        nuevaFila.innerHTML = `
-          <td>${contador}</td>
-          <td>${email}</td>
-          <td>${password}</td>
-          <td>${recordar}</td>
-        `;
-        tabla.appendChild(nuevaFila);
-        form.reset();
-      });
-    </script>
-  </body>
+          <div id="gameArea" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal-like history (simple) -->
+    <div id="historyArea" class="card p-3 mt-4 d-none">
+      <h5>Historial de acciones</h5>
+      <ul id="historyList" class="list-group list-group-flush mt-2"></ul>
+      <div class="mt-2"><button id="closeHistory" class="btn btn-sm" style="background:#333;color:#fff">Cerrar historial</button></div>
+    </div>
+  </div>
+
+<script>
+/* ============================
+   Storage structure (per user)
+   usuarios = [
+     { email, password, recordar, score, sessions, history:[], tttPlayed, quizCorrect }
+   ]
+   ============================ */
+const KEY = 'usuarios_v3_ineffa';
+
+let usuarios = JSON.parse(localStorage.getItem(KEY)) || [];
+let usuarioActual = null;
+
+/* ---------- helpers ---------- */
+function saveUsers(){ localStorage.setItem(KEY, JSON.stringify(usuarios)); }
+function findUserByEmail(email){ return usuarios.find(u=>u.email===email); }
+function addHistory(u, text){ u.history = u.history || []; u.history.unshift({t: new Date().toLocaleString(), txt:text}); if(u.history.length>50) u.history.pop(); saveUsers(); }
+
+/* ---------- UI elements ---------- */
+const tabla = document.getElementById('tablaUsuarios');
+const form = document.getElementById('loginForm');
+const userPanel = document.getElementById('userPanel');
+const panelEmail = document.getElementById('panelEmail');
+const panelScore = document.getElementById('panelScore');
+const panelSessions = document.getElementById('panelSessions');
+const panelMsg = document.getElementById('panelMsg');
+const btnPlayMenu = document.getElementById('btnPlayMenu');
+const btnViewHistory = document.getElementById('btnViewHistory');
+const btnLogout = document.getElementById('btnLogout');
+const btnClearUsers = document.getElementById('btnClearUsers');
+
+const chatBox = document.getElementById('chatBox');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+const scoreBadge = document.getElementById('scoreBadge');
+const tttPlayedBadge = document.getElementById('tttPlayed');
+const quizCorrectBadge = document.getElementById('quizCorrect');
+
+const playArea = document.getElementById('playArea');
+const gameArea = document.getElementById('gameArea');
+const playMath = document.getElementById('playMath');
+const playRiddle = document.getElementById('playRiddle');
+const playTic = document.getElementById('playTic');
+const closePlay = document.getElementById('closePlay');
+
+const historyArea = document.getElementById('historyArea');
+const historyList = document.getElementById('historyList');
+const closeHistory = document.getElementById('closeHistory');
+
+/* ---------- initial render ---------- */
+renderTable();
+renderChat("¡Hola! Soy Asistente Ineffa 💠 — escribe 'jugar' para empezar, o 'puntaje' para ver tus puntos.");
+
+/* ---------- Table functions ---------- */
+function renderTable(){
+  tabla.innerHTML = '';
+  usuarios.forEach((u,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${u.email}</td>
+      <td>${'•'.repeat(8)}</td>
+      <td>${u.recordar||'No'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="loginAs(${i})">Ingresar</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteUser(${i})">Eliminar</button>
+      </td>
+    `;
+    tabla.appendChild(tr);
+  });
+}
+
+/* ---------- Login/Register ---------- */
+form.addEventListener('submit', e=>{
+  e.preventDefault();
+  const email = form.email.value.trim();
+  const password = form.password.value;
+  const recordar = form.checkRemember.checked ? 'Sí' : 'No';
+  if(!email || !password) return alert('Rellena ambos campos.');
+
+  let user = findUserByEmail(email);
+  if(!user){
+    // register
+    user = { email, password, recordar, score:0, sessions:0, history:[], tttPlayed:0, quizCorrect:0 };
+    usuarios.push(user);
+    saveUsers();
+    renderChat(`Cuenta creada para ${email}. ¡Bienvenido!`);
+  } else {
+    // exist -> check password
+    if(user.password !== password) return alert('Contraseña incorrecta.');
+    renderChat(`Bienvenido de nuevo, ${email}!`);
+  }
+  // set active
+  usuarioActual = user;
+  usuarioActual.sessions = (usuarioActual.sessions||0) + 1;
+  addHistory(usuarioActual, `Inicio de sesión`);
+  saveUsers();
+  showPanelForUser(usuarioActual);
+  renderTable();
+  form.reset();
+});
+
+/* ---------- Table actions (global funcs used inline) ---------- */
+window.deleteUser = function(i){
+  if(!confirm('Eliminar usuario?')) return;
+  usuarios.splice(i,1);
+  saveUsers();
+  renderTable();
+}
+window.loginAs = function(i){
+  usuarioActual = usuarios[i];
+  usuarioActual.sessions = (usuarioActual.sessions||0) + 1;
+  addHistory(usuarioActual, 'Inicio de sesión (por tabla)');
+  saveUsers();
+  showPanelForUser(usuarioActual);
+  renderChat(`Has iniciado sesión como ${usuarioActual.email}`);
+}
+
+/* ---------- Panel and Chat ---------- */
+function showPanelForUser(u){
+  if(!u) { userPanel.classList.add('d-none'); return; }
+  userPanel.classList.remove('d-none');
+  panelEmail.textContent = u.email;
+  panelScore.textContent = u.score||0;
+  panelSessions.textContent = u.sessions||0;
+  panelMsg.textContent = `¡Hola ${u.email}! Usa 'jugar' o pulsa Jugar para elegir un juego.`;
+  scoreBadge.textContent = u.score||0;
+  tttPlayedBadge.textContent = u.tttPlayed||0;
+  quizCorrectBadge.textContent = u.quizCorrect||0;
+}
+function renderChat(text, who='ia'){
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + (who==='ia' ? 'ia-msg' : 'user-msg');
+  div.textContent = (who==='ia'? 'Ineffa: ' : 'Tú: ') + text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+/* ---------- Buttons ---------- */
+btnPlayMenu.addEventListener('click', ()=>{ playArea.classList.toggle('d-none'); });
+btnViewHistory.addEventListener('click', ()=>{
+  if(!usuarioActual){ alert('Inicia sesión para ver historial.'); return; }
+  historyArea.classList.remove('d-none'); playArea.classList.add('d-none');
+  historyList.innerHTML = '';
+  (usuarioActual.history||[]).forEach(h=>{
+    const li = document.createElement('li'); li.className='list-group-item bg-transparent text-white';
+    li.innerHTML = `<small class="text-muted">${h.t}</small><div>${h.txt}</div>`;
+    historyList.appendChild(li);
+  });
+});
+closeHistory.addEventListener('click', ()=>historyArea.classList.add('d-none'));
+btnLogout.addEventListener('click', ()=>{ usuarioActual=null; userPanel.classList.add('d-none'); renderChat('Has cerrado sesión.'); });
+btnClearUsers.addEventListener('click', ()=>{
+  if(!confirm('Borrar TODOS los usuarios (localStorage)?')) return;
+  usuarios=[]; saveUsers(); renderTable(); alert('Usuarios borrados.');
+});
+
+/* ---------- Chat input ---------- */
+chatSend.addEventListener('click', processChat);
+chatInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') processChat(); });
+
+function processChat(){
+  const txt = chatInput.value.trim();
+  if(!txt) return;
+  renderChat(txt, 'user');
+  chatInput.value='';
+  // commands
+  const t = txt.toLowerCase();
+  if(t==='jugar' || t==='juegos'){ playArea.classList.remove('d-none'); renderChat('¿Qué juego quieres? matemáticas / adivinanza / gato'); return; }
+  if(t==='puntaje' || t==='puntos'){ if(!usuarioActual){ renderChat('Inicia sesión para ver puntaje.'); } else renderChat(`Tienes ${usuarioActual.score||0} puntos.`); return; }
+  if(t==='historial'){ if(!usuarioActual) renderChat('Inicia sesión para ver historial.'); else { btnViewHistory.click(); renderChat('Mostrando historial.'); } return; }
+  // if user asks for play types directly
+  if(t.includes('matem') || t==='matematicas' || t==='math') { startMathGame(); return; }
+  if(t.includes('adivin') || t==='adivinanza' || t==='riddle') { startRiddle(); return; }
+  if(t==='gato' || t==='tic tac toe' || t==='tictactoe') { startTicTacToe(); return; }
+
+  // default reply
+  setTimeout(()=> {
+    renderChat("Puedo jugar: escribe 'jugar' o escribe 'matematicas' / 'adivinanza' / 'gato'. También 'puntaje' para ver puntos.", 'ia');
+  }, 600);
+}
+
+/* ---------- GAMES: Math Quiz ---------- */
+const mathQuestions = []; // we'll generate on the fly
+function genMathQuestion(difficulty=1){
+  // difficulty controls larger numbers
+  const a = Math.floor(Math.random()* (5*difficulty + 3)) + 1;
+  const b = Math.floor(Math.random()* (5*difficulty + 3)) + 1;
+  const ops = ['+','-','*'];
+  const op = ops[Math.floor(Math.random()*ops.length)];
+  let expression = `${a} ${op} ${b}`;
+  let answer = eval(expression);
+  return { q:`¿Cuánto es ${expression}?`, a: answer.toString() };
+}
+
+let currentQuiz = null;
+function startMathGame(){
+  if(!usuarioActual){ renderChat('Inicia sesión para jugar.'); return; }
+  playArea.classList.remove('d-none'); gameArea.innerHTML='';
+  renderChat('Comenzando: matemáticas rápidas. Responde la pregunta que te dé Ineffa.');
+  nextMathQuestion();
+}
+function nextMathQuestion(){
+  currentQuiz = genMathQuestion();
+  gameArea.innerHTML = `
+    <div class="mb-2"><strong>${currentQuiz.q}</strong></div>
+    <div class="d-flex gap-2">
+      <input id="mathAnswer" class="form-control" placeholder="Tu respuesta">
+      <button id="mathSubmit" class="btn btn-primary">Enviar</button>
+    </div>
+    <div class="mt-2 small-muted">Responde correctamente para ganar +1 punto.</div>
+  `;
+  document.getElementById('mathSubmit').onclick = ()=>{
+    const val = document.getElementById('mathAnswer').value.trim();
+    checkMathAnswer(val);
+  };
+}
+function checkMathAnswer(val){
+  if(!usuarioActual){ renderChat('Inicia sesión.'); return; }
+  if(val === currentQuiz.a){
+    usuarioActual.score = (usuarioActual.score||0) + 1;
+    usuarioActual.quizCorrect = (usuarioActual.quizCorrect||0) + 1;
+    addHistory(usuarioActual, `Acierto en matemáticas: ${currentQuiz.q} => ${val}`);
+    saveUsers();
+    updatePanelAndBadges();
+    renderChat('¡Correcto! Has ganado +1 punto.');
+  } else {
+    addHistory(usuarioActual, `Fallo en matemáticas: ${currentQuiz.q} => ${val}`);
+    saveUsers();
+    renderChat(`Incorrecto. La respuesta era ${currentQuiz.a}.`);
+  }
+  setTimeout(nextMathQuestion, 900);
+}
+
+/* ---------- GAMES: Riddles ---------- */
+const riddles = [
+  {q: "Blanca por dentro, verde por fuera. Si quieres que te lo diga, espera.", a:"pera"},
+  {q: "Siempre va hacia arriba y nunca baja. ¿Qué es?", a:"edad"},
+  {q: "No camina ni corre, pero su casa siempre carga. ¿Qué es?", a:"caracol"},
+  {q: "Tiene agujas pero no cose. ¿Qué es?", a:"reloj"}
+];
+
+let currentRiddle = null;
+function startRiddle(){
+  if(!usuarioActual){ renderChat('Inicia sesión para jugar.'); return; }
+  playArea.classList.remove('d-none'); gameArea.innerHTML='';
+  renderChat('Comenzando: adivinanzas. Responde la adivinanza.');
+  nextRiddle();
+}
+function nextRiddle(){
+  currentRiddle = riddles[Math.floor(Math.random()*riddles.length)];
+  gameArea.innerHTML = `
+    <div class="mb-2"><strong>${currentRiddle.q}</strong></div>
+    <div class="d-flex gap-2">
+      <input id="riddleAnswer" class="form-control" placeholder="Tu respuesta">
+      <button id="riddleSubmit" class="btn btn-primary">Enviar</button>
+    </div>
+    <div class="mt-2 small-muted">Responde correctamente para ganar +1 punto.</div>
+  `;
+  document.getElementById('riddleSubmit').onclick = ()=>{
+    const val = document.getElementById('riddleAnswer').value.trim().toLowerCase();
+    checkRiddleAnswer(val);
+  };
+}
+function checkRiddleAnswer(val){
+  if(val === currentRiddle.a.toLowerCase()){
+    usuarioActual.score = (usuarioActual.score||0) + 1;
+    addHistory(usuarioActual, `Acierto en adivinanza: ${currentRiddle.q}`);
+    saveUsers(); updatePanelAndBadges();
+    renderChat('¡Muy bien! Has ganado +1 punto.');
+  } else {
+    addHistory(usuarioActual, `Fallo en adivinanza: ${currentRiddle.q} => ${val}`);
+    saveUsers();
+    renderChat(`No exacto. La respuesta correcta era "${currentRiddle.a}".`);
+  }
+  setTimeout(nextRiddle, 900);
+}
+
+/* ---------- GAMES: Tic Tac Toe (minimax AI) ---------- */
+function startTicTacToe(){
+  if(!usuarioActual){ renderChat('Inicia sesión para jugar.'); return; }
+  playArea.classList.remove('d-none'); gameArea.innerHTML='';
+  renderChat('Iniciando Gato. Juegas con X. Ineffa es O. ¡Buena suerte!');
+  renderTicBoard(['','','','','','','','',''], true);
+}
+
+let tttBoard = null;
+let tttTurnX = true; // user's turn when true
+
+function renderTicBoard(board, userStarts=true){
+  tttBoard = board.slice();
+  tttTurnX = userStarts;
+  gameArea.innerHTML = `
+    <div class="mb-2"><strong>Gato (Tic-Tac-Toe)</strong></div>
+    <div class="ttt-board" id="tttBoard"></div>
+    <div class="mt-2 small-muted">Haz click en una celda para marcar (X).</div>
+    <div class="mt-3"><button id="resetTTT" class="btn btn-sm btn-secondary">Reiniciar</button></div>
+  `;
+  const boardEl = document.getElementById('tttBoard');
+  boardEl.innerHTML = '';
+  for(let i=0;i<9;i++){
+    const cell = document.createElement('div');
+    cell.className = 'ttt-cell';
+    cell.dataset.i = i;
+    cell.textContent = tttBoard[i];
+    cell.onclick = ()=> onTttClick(i);
+    boardEl.appendChild(cell);
+  }
+  document.getElementById('resetTTT').onclick = ()=> startTicTacToe();
+  // if AI starts
+  if(!userStarts) aiMoveTTT();
+}
+
+function onTttClick(i){
+  if(!tttTurnX) return;
+  if(tttBoard[i]) return;
+  tttBoard[i] = 'X';
+  tttTurnX = false;
+  renderTicBoard(tttBoard, false);
+  const res = checkTicResult(tttBoard);
+  if(res){ handleTttResult(res); return; }
+  setTimeout(()=> { aiMoveTTT(); }, 400);
+}
+
+function aiMoveTTT(){
+  // use minimax to pick best move
+  const best = findBestMove(tttBoard, 'O');
+  if(best !== null) tttBoard[best] = 'O';
+  tttTurnX = true;
+  renderTicBoard(tttBoard, true);
+  const res = checkTicResult(tttBoard);
+  if(res){ handleTttResult(res); return; }
+}
+
+function checkTicResult(b){
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for(const w of wins){
+    const [a,b1,c] = w;
+    if(b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a]; // 'X' or 'O'
+  }
+  if(b.every(c=>c)) return 'tie';
+  return null;
+}
+
+function handleTttResult(res){
+  if(res === 'X'){ // user wins
+    usuarioActual.score = (usuarioActual.score||0)+2;
+    usuarioActual.tttPlayed = (usuarioActual.tttPlayed||0)+1;
+    addHistory(usuarioActual, 'Gano en TicTacToe');
+    saveUsers(); updatePanelAndBadges();
+    renderChat('¡Felicidades! Ganaste el Gato. +2 puntos.');
+  } else if(res === 'O'){
+    usuarioActual.tttPlayed = (usuarioActual.tttPlayed||0)+1;
+    addHistory(usuarioActual, 'Perdió en TicTacToe');
+    saveUsers(); updatePanelAndBadges();
+    renderChat('Ineffa gana esta vez. ¡Inténtalo otra vez!');
+  } else { // tie
+    usuarioActual.score = (usuarioActual.score||0)+1;
+    usuarioActual.tttPlayed = (usuarioActual.tttPlayed||0)+1;
+    addHistory(usuarioActual, 'Empate en TicTacToe');
+    saveUsers(); updatePanelAndBadges();
+    renderChat('Empate. Ambos reciben +1 punto.');
+  }
+  // offer restart
+  setTimeout(()=> {
+    renderTicBoard(['','','','','','','','',''], true);
+  }, 900);
+}
+
+/* Minimax implementation */
+function findBestMove(board, aiPlayer){
+  const huPlayer = aiPlayer === 'O' ? 'X' : 'O';
+  function emptyIndexes(b){ return b.map((v,i)=>v?null:i).filter(v=>v!==null); }
+  function win(b, p){
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    return wins.some(w=> w.every(idx=>b[idx]===p));
+  }
+  function minimax(newBoard, player){
+    const avail = emptyIndexes(newBoard);
+    if(win(newBoard, huPlayer)) return {score:-10};
+    if(win(newBoard, aiPlayer)) return {score:10};
+    if(avail.length===0) return {score:0};
+    const moves=[];
+    for(let i=0;i<avail.length;i++){
+      const move={index:avail[i]};
+      newBoard[avail[i]] = player;
+      const result = minimax(newBoard, player===aiPlayer?huPlayer:aiPlayer);
+      move.score = result.score;
+      newBoard[avail[i]] = '';
+      moves.push(move);
+    }
+    let bestMove;
+    if(player === aiPlayer){
+      let bestScore=-Infinity;
+      for(const m of moves) if(m.score>bestScore){ bestScore=m.score; bestMove=m;}
+    } else {
+      let bestScore=Infinity;
+      for(const m of moves) if(m.score<bestScore){ bestScore=m.score; bestMove=m;}
+    }
+    return bestMove;
+  }
+  const res = minimax(board.slice(), aiPlayer);
+  return res?res.index:null;
+}
+
+/* ---------- Utilities ---------- */
+function updatePanelAndBadges(){
+  if(!usuarioActual) return;
+  panelScore.textContent = usuarioActual.score||0;
+  scoreBadge.textContent = usuarioActual.score||0;
+  tttPlayedBadge.textContent = usuarioActual.tttPlayed||0;
+  quizCorrectBadge.textContent = usuarioActual.quizCorrect||0;
+}
+
+/* ---------- Play Menu handlers ---------- */
+playMath.addEventListener('click', startMathGame);
+playRiddle.addEventListener('click', startRiddle);
+playTic.addEventListener('click', startTicTacToe);
+closePlay.addEventListener('click', ()=>{ playArea.classList.add('d-none'); gameArea.innerHTML=''; });
+
+/* ---------- Simple persistence UI growth ---------- */
+function initDemoUsers(){
+  if(usuarios.length===0){
+    usuarios.push({ email:'demo1@gmail.com', password:'1234', recordar:'No', score:3, sessions:1, history:[], tttPlayed:1, quizCorrect:2});
+    usuarios.push({ email:'demo2@gmail.com', password:'abcd', recordar:'Sí', score:5, sessions:2, history:[], tttPlayed:2, quizCorrect:3});
+    saveUsers(); renderTable();
+  }
+}
+initDemoUsers();
+
+/* update table and panel on load */
+renderTable();
+if(!usuarioActual) userPanel.classList.add('d-none');
+
+</script>
+</body>
 </html>
